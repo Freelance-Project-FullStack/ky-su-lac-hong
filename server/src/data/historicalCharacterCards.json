@@ -1,0 +1,11 @@
+[
+    {
+      "id": "HC001",
+      "title": "Vua Hùng",
+      "descriptionText": "Khi đi qua ô LẬP QUỐC, nhận gấp đôi số tiền thưởng.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Nhận gấp đôi tiền thưởng tại ô LẬP QUỐC.",
+      "activationCondition": "ON_PASSING_START",
+      "imageAsset": "path/to/vua_hung.png"
+    }
+  ]

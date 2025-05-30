@@ -1,0 +1,9 @@
+{
+    "maxPlayers": 4,
+    "startingMoney": 150000,
+    "moneyPerLap": 20000, 
+    "jailFine": 5000,
+    "maxConsecutiveDoubles": 3,
+    "initialHistoricalCards": 1,
+    "allianceDurationTurns": 4
+}

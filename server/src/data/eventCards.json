@@ -1,0 +1,18 @@
+[
+    {
+      "id": "EC001",
+      "title": "Được Mùa Bội Thu",
+      "descriptionText": "Nhận 20000 Vàng từ ngân khố.",
+      "cardType": "EVENT_OPPORTUNITY",
+      "eventType": "GAIN_MONEY",
+      "amount": 20000
+    },
+    {
+      "id": "EC002",
+      "title": "Giặc Ngoại Xâm",
+      "descriptionText": "Tất cả người chơi phải đóng góp 5000 Vàng để chống giặc. Ai không đủ tiền sẽ bị phá hủy 1 công trình ngẫu nhiên.",
+      "cardType": "EVENT_FATE",
+      "eventType": "PAY_OR_LOSE_BUILDING",
+      "amount": 5000
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+      "id": "SQ001",
+      "name": "LẬP QUỐC (Văn Lang)",
+      "type": "START",
+      "historicalPeriod": "Hùng Vương"
+    },
+    {
+      "id": "SQ002",
+      "name": "Đất Cổ Loa",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 6000,
+      "baseRent": 200,
+      "rentByBuildingLevel": [600, 1800, 3200, 4500],
+      "historicalPeriod": "An Dương Vương",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 5000 }
+    },
+    {
+      "id": "SQ003",
+      "name": "Ô Cơ Hội",
+      "type": "EVENT_CHANCE",
+      "historicalPeriod": null
+    }
+]
