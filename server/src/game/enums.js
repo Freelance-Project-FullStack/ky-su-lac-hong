@@ -12,6 +12,7 @@ const GAME_PHASES = {
   const SQUARE_TYPES = {
     START: 'START',
     PROPERTY_LAND: 'PROPERTY_LAND',
+    RIVER: 'RIVER', // Con sông
     EVENT_CHANCE: 'EVENT_CHANCE', // Cơ Hội
     EVENT_FATE: 'EVENT_FATE',     // Vận Mệnh
     TAX_PAYMENT: 'TAX_PAYMENT',

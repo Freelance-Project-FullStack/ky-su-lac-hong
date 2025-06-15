@@ -7,5 +7,86 @@
       "powerDescription": "Nhận gấp đôi tiền thưởng tại ô LẬP QUỐC.",
       "activationCondition": "ON_PASSING_START",
       "imageAsset": "path/to/vua_hung.png"
+    },
+    {
+      "id": "HC002",
+      "title": "An Dương Vương",
+      "descriptionText": "Miễn phí xây dựng 1 thành lũy.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Xây dựng 1 thành lũy miễn phí.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/an_duong_vuong.png"
+    },
+    {
+      "id": "HC003",
+      "title": "Trưng Trắc",
+      "descriptionText": "Thoát khỏi giam cầm ngay lập tức.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Thoát giam cầm miễn phí.",
+      "activationCondition": "WHEN_IN_JAIL",
+      "imageAsset": "path/to/trung_trac.png"
+    },
+    {
+      "id": "HC004",
+      "title": "Trưng Nhị",
+      "descriptionText": "Nhận thêm 300000 Vàng từ kho bạc.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Nhận 300000 Vàng.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/trung_nhi.png"
+    },
+    {
+      "id": "HC005",
+      "title": "Lý Thái Tổ",
+      "descriptionText": "Chuyển thủ đô - di chuyển đến ô bất kỳ.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Di chuyển đến ô bất kỳ.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/ly_thai_to.png"
+    },
+    {
+      "id": "HC006",
+      "title": "Lý Thái Tông",
+      "descriptionText": "Giảm 50% giá mua đất trong lượt này.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Giảm 50% giá mua đất.",
+      "activationCondition": "BEFORE_PURCHASE",
+      "imageAsset": "path/to/ly_thai_tong.png"
+    },
+    {
+      "id": "HC007",
+      "title": "Trần Hưng Đạo",
+      "descriptionText": "Thắng mọi thách đấu trong 2 lượt tiếp theo.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Thắng mọi thách đấu.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/tran_hung_dao.png"
+    },
+    {
+      "id": "HC008",
+      "title": "Trần Quốc Tuấn",
+      "descriptionText": "Bảo vệ tất cả tài sản khỏi bị phá hủy 1 lần.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Bảo vệ tài sản khỏi phá hủy.",
+      "activationCondition": "WHEN_ATTACKED",
+      "imageAsset": "path/to/tran_quoc_tuan.png"
+    },
+    {
+      "id": "HC009",
+      "title": "Hồ Quý Ly",
+      "descriptionText": "Cải cách thuế - giảm 50% thuế phải trả trong 3 lượt.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Giảm 50% thuế trong 3 lượt.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/ho_quy_ly.png"
+    },
+    {
+      "id": "HC010",
+      "title": "Lê Lợi",
+      "descriptionText": "Khởi nghĩa Lam Sơn - nhận 500000 Vàng.",
+      "cardType": "HISTORICAL_CHARACTER",
+      "powerDescription": "Nhận 500000 Vàng.",
+      "activationCondition": "ANY_TIME",
+      "imageAsset": "path/to/le_loi.png"
     }
   ]

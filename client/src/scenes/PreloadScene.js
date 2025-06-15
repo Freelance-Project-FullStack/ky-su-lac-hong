@@ -6,31 +6,47 @@ export default class PreloadScene extends Phaser.Scene {
   }
 
   preload() {
-    // Hiển thị logo đã tải từ BootScene
-    this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 100, 'logo');
+    console.log('PreloadScene: preload started');
+
+    // Tạo background
+    const { width, height } = this.cameras.main;
+    const bg = this.add.rectangle(width/2, height/2, width, height, 0x1a1a2e);
+    bg.setDepth(-1);
+
+    // Add title
+    this.add.text(width/2, height/2 - 100, 'Kỳ Sử Lạc Hồng', {
+      fontSize: '36px',
+      color: '#ffd700',
+      fontFamily: 'Arial, sans-serif',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
 
     // Tạo thanh tiến trình loading
     const progressBar = this.add.graphics();
     const progressBox = this.add.graphics();
     progressBox.fillStyle(0x222222, 0.8);
-    progressBox.fillRect(this.cameras.main.centerX - 160, this.cameras.main.centerY, 320, 50);
+    progressBox.fillRect(width/2 - 160, height/2, 320, 50);
+
+    // Add border to progress box
+    progressBox.lineStyle(2, 0x444444);
+    progressBox.strokeRect(width/2 - 160, height/2, 320, 50);
 
     const loadingText = this.make.text({
-      x: this.cameras.main.centerX,
-      y: this.cameras.main.centerY - 50,
-      text: 'Đang tải...',
+      x: width/2,
+      y: height/2 - 50,
+      text: 'Đang tải tài nguyên...',
       style: {
-        font: '20px monospace',
+        font: '20px Arial, sans-serif',
         fill: '#ffffff'
       }
     }).setOrigin(0.5, 0.5);
 
     const percentText = this.make.text({
-      x: this.cameras.main.centerX,
-      y: this.cameras.main.centerY + 25,
+      x: width/2,
+      y: height/2 + 25,
       text: '0%',
       style: {
-        font: '18px monospace',
+        font: '18px Arial, sans-serif',
         fill: '#ffffff'
       }
     }).setOrigin(0.5, 0.5);
@@ -38,52 +54,71 @@ export default class PreloadScene extends Phaser.Scene {
     // Lắng nghe sự kiện tiến trình tải
     this.load.on('progress', (value) => {
       progressBar.clear();
-      progressBar.fillStyle(0xffffff, 1);
-      progressBar.fillRect(this.cameras.main.centerX - 150, this.cameras.main.centerY + 10, 300 * value, 30);
+      progressBar.fillStyle(0x4CAF50, 1);
+      progressBar.fillRect(width/2 - 150, height/2 + 10, 300 * value, 30);
       percentText.setText(parseInt(value * 100) + '%');
+
+      // Add glow effect
+      if (value > 0) {
+        progressBar.fillStyle(0x81C784, 0.5);
+        progressBar.fillRect(width/2 - 150, height/2 + 10, 300 * value, 30);
+      }
     });
 
     // Lắng nghe sự kiện tải hoàn tất
     this.load.on('complete', () => {
+      console.log('PreloadScene: Loading complete, switching to LoginScene');
       progressBar.destroy();
       progressBox.destroy();
       loadingText.destroy();
       percentText.destroy();
-      this.scene.start('MainMenuScene'); // Chuyển đến màn hình chính
+
+      // Add a small delay to show completion
+      this.time.delayedCall(500, () => {
+        this.scene.start('LoginScene'); // Chuyển đến màn hình đăng nhập
+      });
     });
 
-    // --- BẮT ĐẦU TẢI TẤT CẢ TÀI SẢN GAME Ở ĐÂY ---
-    // Đường dẫn ví dụ, bạn cần thay thế bằng tài nguyên thực tế của mình
+    // --- TẠM THỜI KHÔNG TẢI ASSETS ĐỂ TRÁNH LỖI ---
+    // Sẽ thêm assets sau khi có file thực tế
+    console.log('PreloadScene: Skipping asset loading for now');
 
-    // 1. Giao diện (UI)
-    this.load.image('mainMenuBackground', 'assets/images/ui/main_menu_bg.jpg');
-    this.load.image('button_normal', 'assets/images/ui/button_normal.png');
-    this.load.image('button_hover', 'assets/images/ui/button_hover.png');
-    this.load.image('popup_background', 'assets/images/ui/popup_bg.png');
+    // Tạo một số placeholder assets bằng graphics
+    this.createPlaceholderAssets();
+  }
 
-    // 2. Bàn cờ và quân cờ
-    this.load.image('gameBoard', 'assets/images/board/ban_co_chinh.png');
-    this.load.image('token_red', 'assets/images/tokens/token_red.png');
-    this.load.image('token_blue', 'assets/images/tokens/token_blue.png');
-    this.load.image('token_green', 'assets/images/tokens/token_green.png');
-    this.load.image('token_yellow', 'assets/images/tokens/token_yellow.png');
+  createPlaceholderAssets() {
+    // Tạo placeholder textures bằng graphics
+    const graphics = this.add.graphics();
 
-    // 3. Công trình
-    this.load.image('building_nha', 'assets/images/buildings/nha.png');
-    this.load.image('building_den', 'assets/images/buildings/den.png');
-    this.load.image('building_thanh', 'assets/images/buildings/thanh.png');
+    // Tạo texture cho button
+    graphics.fillStyle(0x4CAF50);
+    graphics.fillRoundedRect(0, 0, 200, 50, 10);
+    graphics.generateTexture('button_normal', 200, 50);
 
-    // 4. Thẻ bài
-    this.load.image('card_back', 'assets/images/cards/card_back.png');
-    // Tải từng thẻ bài cụ thể nếu cần hiển thị hình ảnh
-    this.load.image('card_hc_vua_hung', 'assets/images/cards/hc_vua_hung.png');
-    this.load.image('card_sk_thien_tai', 'assets/images/cards/sk_thien_tai.png');
-    // ...
+    graphics.clear();
+    graphics.fillStyle(0x45a049);
+    graphics.fillRoundedRect(0, 0, 200, 50, 10);
+    graphics.generateTexture('button_hover', 200, 50);
 
-    // 5. Âm thanh
-    this.load.audio('dice_roll_sound', 'assets/audio/dice_roll.mp3');
-    this.load.audio('player_move_sound', 'assets/audio/player_move.mp3');
-    this.load.audio('buy_property_sound', 'assets/audio/buy_property.mp3');
-    this.load.audio('background_music', 'assets/audio/background_music.mp3');
+    // Tạo texture cho game board
+    graphics.clear();
+    graphics.fillStyle(0x8B4513);
+    graphics.fillRect(0, 0, 800, 600);
+    graphics.generateTexture('gameBoard', 800, 600);
+
+    // Tạo texture cho tokens
+    const colors = [0xFF0000, 0x0000FF, 0x00FF00, 0xFFFF00];
+    const tokenNames = ['token_red', 'token_blue', 'token_green', 'token_yellow'];
+
+    colors.forEach((color, index) => {
+      graphics.clear();
+      graphics.fillStyle(color);
+      graphics.fillCircle(15, 15, 15);
+      graphics.generateTexture(tokenNames[index], 30, 30);
+    });
+
+    graphics.destroy();
+    console.log('PreloadScene: Placeholder assets created');
   }
 }

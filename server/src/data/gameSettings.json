@@ -1,9 +1,16 @@
 {
     "maxPlayers": 4,
-    "startingMoney": 150000,
-    "moneyPerLap": 20000, 
-    "jailFine": 5000,
+    "startingMoney": 2000000,
+    "moneyPerLap": 200000,
+    "jailFine": 50000,
     "maxConsecutiveDoubles": 3,
     "initialHistoricalCards": 1,
-    "allianceDurationTurns": 4
+    "allianceDurationTurns": 4,
+    "winConditions": {
+        "monopolyCount": 3,
+        "territoryUnificationSquares": 8,
+        "riverSquaresRequired": 4
+    },
+    "currencyDenominations": [5000, 10000, 20000, 50000, 100000, 200000, 500000],
+    "buildingUpgradeThreshold": 3
 }

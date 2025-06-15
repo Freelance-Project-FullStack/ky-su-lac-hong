@@ -18,6 +18,10 @@ class Player {
     this.allianceTurnsLeft = 0;
     this.monopolySets = []; // Mảng các historicalPeriod mà người chơi độc quyền
     this.getOutOfJailFreeCards = 0;
+    this.isBankrupt = false;
+    this.isIndebted = false;
+    this.debtAmount = 0;
+    this.creditorId = null;
   }
 
   updatePosition(newSquareIndex) {

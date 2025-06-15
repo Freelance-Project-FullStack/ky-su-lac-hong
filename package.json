@@ -1,0 +1,36 @@
+{
+  "name": "ky-su-lac-hong",
+  "version": "1.0.0",
+  "description": "Vietnamese Historical Board Game - Kỳ Sử Lạc Hồng",
+  "main": "index.js",
+  "scripts": {
+    "dev": "./start-dev.sh",
+    "start": "docker-compose up",
+    "stop": "docker-compose down",
+    "build": "docker-compose build",
+    "test": "cd server && npm test",
+    "install:all": "npm run install:server && npm run install:client",
+    "install:server": "cd server && npm install",
+    "install:client": "cd client && npm install",
+    "clean": "docker-compose down -v && docker system prune -f"
+  },
+  "keywords": [
+    "board-game",
+    "vietnamese",
+    "history",
+    "multiplayer",
+    "phaser",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "Kỳ Sử Lạc Hồng Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/ky-su-lac-hong.git"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

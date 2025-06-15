@@ -2,17 +2,80 @@
     {
       "id": "EC001",
       "title": "Được Mùa Bội Thu",
-      "descriptionText": "Nhận 20000 Vàng từ ngân khố.",
+      "descriptionText": "Nhận 200000 Vàng từ ngân khố.",
       "cardType": "EVENT_OPPORTUNITY",
       "eventType": "GAIN_MONEY",
-      "amount": 20000
+      "amount": 200000
     },
     {
       "id": "EC002",
       "title": "Giặc Ngoại Xâm",
-      "descriptionText": "Tất cả người chơi phải đóng góp 5000 Vàng để chống giặc. Ai không đủ tiền sẽ bị phá hủy 1 công trình ngẫu nhiên.",
+      "descriptionText": "Tất cả người chơi phải đóng góp 50000 Vàng để chống giặc. Ai không đủ tiền sẽ bị phá hủy 1 công trình ngẫu nhiên.",
       "cardType": "EVENT_FATE",
       "eventType": "PAY_OR_LOSE_BUILDING",
-      "amount": 5000
+      "amount": 50000
+    },
+    {
+      "id": "EC003",
+      "title": "Thương Mại Phát Đạt",
+      "descriptionText": "Nhận 150000 Vàng từ hoạt động thương mại.",
+      "cardType": "EVENT_OPPORTUNITY",
+      "eventType": "GAIN_MONEY",
+      "amount": 150000
+    },
+    {
+      "id": "EC004",
+      "title": "Thiên Tai Lũ Lụt",
+      "descriptionText": "Mất 100000 Vàng để khắc phục thiệt hại.",
+      "cardType": "EVENT_FATE",
+      "eventType": "LOSE_MONEY",
+      "amount": 100000
+    },
+    {
+      "id": "EC005",
+      "title": "Miễn Thuế",
+      "descriptionText": "Được miễn thuế 3 lượt tiếp theo.",
+      "cardType": "EVENT_OPPORTUNITY",
+      "eventType": "TAX_EXEMPTION",
+      "duration": 3
+    },
+    {
+      "id": "EC006",
+      "title": "Dịch Bệnh",
+      "descriptionText": "Tất cả người chơi mất 75000 Vàng để chữa trị.",
+      "cardType": "EVENT_FATE",
+      "eventType": "ALL_LOSE_MONEY",
+      "amount": 75000
+    },
+    {
+      "id": "EC007",
+      "title": "Phát Hiện Kho Báu",
+      "descriptionText": "Nhận 300000 Vàng từ kho báu cổ.",
+      "cardType": "EVENT_OPPORTUNITY",
+      "eventType": "GAIN_MONEY",
+      "amount": 300000
+    },
+    {
+      "id": "EC008",
+      "title": "Chiến Tranh",
+      "descriptionText": "Phá hủy 1 công trình ngẫu nhiên và mất 80000 Vàng.",
+      "cardType": "EVENT_FATE",
+      "eventType": "LOSE_BUILDING_AND_MONEY",
+      "amount": 80000
+    },
+    {
+      "id": "EC009",
+      "title": "Thoát Khỏi Giam Cầm",
+      "descriptionText": "Nhận 1 thẻ thoát giam cầm miễn phí.",
+      "cardType": "EVENT_OPPORTUNITY",
+      "eventType": "GET_OUT_OF_JAIL_FREE"
+    },
+    {
+      "id": "EC010",
+      "title": "Thuế Đặc Biệt",
+      "descriptionText": "Nộp thuế 120000 Vàng cho triều đình.",
+      "cardType": "EVENT_FATE",
+      "eventType": "PAY_TAX",
+      "amount": 120000
     }
 ]

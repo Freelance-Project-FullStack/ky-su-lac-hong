@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: ky-su-lac-hong-mongodb
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: ky_su_lac_hong
+    volumes:
+      - mongodb_data:/data/db
+      - ./server/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - ky-su-lac-hong-network
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: ky-su-lac-hong-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://gameuser:gamepass123@mongodb:27017/ky_su_lac_hong?authSource=ky_su_lac_hong
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      PORT: 3000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    networks:
+      - ky-su-lac-hong-network
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: ky-su-lac-hong-client
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    networks:
+      - ky-su-lac-hong-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  ky-su-lac-hong-network:
+    driver: bridge

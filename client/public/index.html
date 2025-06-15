@@ -3,30 +3,465 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kỳ Sử Lạc Hồng</title>
+    <title>Kỳ Sử Lạc Hồng - Vietnamese Historical Board Game</title>
+    <meta name="description" content="Trò chơi board game lịch sử Việt Nam - Kỳ Sử Lạc Hồng">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            overflow: hidden;
             height: 100vh;
         }
-        /* Style cho các input field của Phaser DOM Element */
-        .game-input {
-            padding: 10px;
-            border: 2px solid #555;
-            border-radius: 5px;
-            background-color: #333;
-            color: #fff;
-            font-size: 16px;
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        /* Game canvas styling */
+        canvas,
+        canvas[data-engine="phaser"],
+        #game-container canvas,
+        div canvas {
+            position: relative !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+            background: #1a1a2e !important;
+            max-width: 100% !important;
+            max-height: 100vh !important;
+            z-index: 1 !important;
+        }
+
+        /* Custom SweetAlert2 styling for Vietnamese game theme */
+        .ky-su-popup {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+            border: 2px solid #ffd700 !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .ky-su-title {
+            color: #ffd700 !important;
+            font-family: 'Arial', sans-serif !important;
+            font-weight: bold !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .ky-su-content {
+            color: #ffffff !important;
+            font-family: 'Arial', sans-serif !important;
+            line-height: 1.6 !important;
+        }
+
+        .ky-su-confirm-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 12px 24px !important;
+            font-weight: bold !important;
+            font-family: 'Arial', sans-serif !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3) !important;
+        }
+
+        .ky-su-confirm-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4) !important;
+        }
+
+        .ky-su-cancel-btn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 12px 24px !important;
+            font-weight: bold !important;
+            font-family: 'Arial', sans-serif !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3) !important;
+        }
+
+        .ky-su-cancel-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4) !important;
+        }
+
+        .ky-su-toast {
+            background: rgba(26, 26, 46, 0.95) !important;
+            border: 1px solid #ffd700 !important;
+            color: #ffffff !important;
+            border-radius: 10px !important;
+        }
+
+        /* Leaderboard table styling */
+        .leaderboard-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px 8px;
             text-align: center;
+            border-bottom: 1px solid #444;
+        }
+
+        .leaderboard-table th {
+            background: #2a2a4e;
+            color: #ffd700;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .leaderboard-table tr:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .leaderboard-table .rank {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .leaderboard-table .player {
+            font-weight: bold;
+        }
+
+        .leaderboard-table .win-rate {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        /* Game history styling */
+        .history-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .game-date {
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        .game-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .game-status.completed {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .game-status.in_progress {
+            background: #2196F3;
+            color: white;
+        }
+
+        .game-status.waiting {
+            background: #FF9800;
+            color: white;
+        }
+
+        .game-status.cancelled {
+            background: #f44336;
+            color: white;
+        }
+
+        .game-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #cccccc;
+        }
+
+        .winner {
+            color: #4CAF50 !important;
+            font-weight: bold;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #cccccc;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        /* Ensure canvas is visible */
+        #game-container canvas {
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        /* Remove duplicate canvas rule */
+        #game-container canvas:not(:first-child) {
+            display: none !important;
+        }
+
+        /* Game input styles */
+        .game-input {
+            padding: 12px 16px;
+            border: 2px solid #4a4a6a;
+            border-radius: 8px;
+            background: rgba(45, 45, 68, 0.9);
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .game-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        .game-input::placeholder {
+            color: #888;
+        }
+
+        /* Hide console errors overlay */
+        #webpack-dev-server-client-overlay {
+            display: none !important;
+        }
+
+        /* Hide runtime error overlay */
+        .error-overlay {
+            display: none !important;
+        }
+
+        /* SweetAlert2 input styling fixes */
+        .swal2-input {
+            background: rgba(45, 45, 68, 0.9) !important;
+            color: white !important;
+            border: 2px solid #4a4a6a !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 16px !important;
+            transition: border-color 0.3s ease !important;
+        }
+
+        .swal2-input:focus {
+            outline: none !important;
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1) !important;
+        }
+
+        .swal2-input::placeholder {
+            color: #888 !important;
+        }
+
+        /* SweetAlert2 select styling */
+        .swal2-select {
+            background: rgba(45, 45, 68, 0.9) !important;
+            color: white !important;
+            border: 2px solid #4a4a6a !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 16px !important;
+        }
+
+        .swal2-select option {
+            background: rgba(45, 45, 68, 0.9) !important;
+            color: white !important;
         }
     </style>
 </head>
 <body>
-    <div id="game-container"></div>
+    <div id="game-container">
+        <!-- Loading fallback -->
+        <div id="loading-fallback" style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        ">
+            <h1 style="color: #ffd700; margin-bottom: 20px;">🎮 Kỳ Sử Lạc Hồng</h1>
+            <p>Đang tải game...</p>
+            <div style="
+                width: 200px;
+                height: 4px;
+                background: #333;
+                border-radius: 2px;
+                margin: 20px auto;
+                overflow: hidden;
+            ">
+                <div style="
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, #4CAF50, #81C784);
+                    animation: loading 2s infinite;
+                "></div>
+            </div>
+
+        </div>
+        <!-- Phaser game will be injected here -->
+    </div>
+
+    <style>
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Disable AudioContext to prevent errors -->
+    <script>
+        // Override AudioContext to prevent errors
+        if (typeof AudioContext !== 'undefined') {
+            const OriginalAudioContext = AudioContext;
+            window.AudioContext = function() {
+                console.log('AudioContext disabled to prevent errors');
+                return {
+                    state: 'suspended',
+                    suspend: () => Promise.resolve(),
+                    resume: () => Promise.resolve(),
+                    close: () => Promise.resolve(),
+                    createGain: () => ({ connect: () => {}, disconnect: () => {} }),
+                    createOscillator: () => ({ connect: () => {}, disconnect: () => {}, start: () => {}, stop: () => {} }),
+                    destination: { connect: () => {}, disconnect: () => {} }
+                };
+            };
+        }
+
+        if (typeof webkitAudioContext !== 'undefined') {
+            window.webkitAudioContext = window.AudioContext;
+        }
+    </script>
+
+    <script src="bundle.js"></script>
+
+    <script>
+        // Hide loading fallback after timeout
+        setTimeout(() => {
+            const loadingFallback = document.getElementById('loading-fallback');
+            if (loadingFallback) {
+                loadingFallback.style.display = 'none';
+                console.log('Loading fallback hidden by timeout');
+            }
+        }, 3000); // Hide after 3 seconds (reduced for testing)
+
+        // Error handling - just log, don't reload
+        window.addEventListener('error', (e) => {
+            console.error('Game Error:', e.error);
+
+            // Hide loading fallback on error
+            const loadingFallback = document.getElementById('loading-fallback');
+            if (loadingFallback) {
+                loadingFallback.style.display = 'none';
+            }
+
+            // Don't show error dialog - just log for debugging
+            console.log('Error suppressed to prevent reload loop');
+        });
+
+        // Connection status
+        window.addEventListener('offline', () => {
+            Swal.fire({
+                title: 'Mất kết nối',
+                text: 'Vui lòng kiểm tra kết nối internet của bạn.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+        });
+
+        // Force canvas visibility when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, setting up canvas observer...');
+
+            // Use MutationObserver to watch for canvas creation
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.tagName === 'CANVAS') {
+                            console.log('Canvas detected! Forcing visibility...');
+                            forceCanvasVisibility(node);
+                        }
+                    });
+                });
+            });
+
+            // Start observing
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+
+            // Also check for existing canvas
+            setTimeout(() => {
+                const canvas = document.querySelector('canvas');
+                if (canvas) {
+                    console.log('Existing canvas found, forcing visibility...');
+                    forceCanvasVisibility(canvas);
+                }
+            }, 100);
+        });
+
+        function forceCanvasVisibility(canvas) {
+            canvas.style.cssText = `
+                position: relative !important;
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+                background: #1a1a2e !important;
+                max-width: 100% !important;
+                max-height: 100vh !important;
+                z-index: 1 !important;
+            `;
+            console.log('Canvas visibility ensured via JavaScript');
+        }
+    </script>
 </body>
 </html>

@@ -9,18 +9,399 @@
       "id": "SQ002",
       "name": "Đất Cổ Loa",
       "type": "PROPERTY_LAND",
-      "purchasePrice": 6000,
-      "baseRent": 200,
-      "rentByBuildingLevel": [600, 1800, 3200, 4500],
+      "purchasePrice": 60000,
+      "baseRent": 2000,
+      "rentByBuildingLevel": [6000, 18000, 32000, 45000],
       "historicalPeriod": "An Dương Vương",
       "canBePurchased": true,
       "canBuildHere": true,
-      "buildingCost": { "NHA": 5000 }
+      "buildingCost": { "NHA": 50000, "DEN": 80000, "THANH": 100000 }
     },
     {
       "id": "SQ003",
       "name": "Ô Cơ Hội",
       "type": "EVENT_CHANCE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ004",
+      "name": "Sông Hồng",
+      "type": "RIVER",
+      "historicalPeriod": "Hùng Vương",
+      "purchasePrice": 200000,
+      "baseRent": 25000,
+      "canBePurchased": true,
+      "canBuildHere": false,
+      "isRiver": true
+    },
+    {
+      "id": "SQ005",
+      "name": "Đất Mê Linh",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 60000,
+      "baseRent": 4000,
+      "rentByBuildingLevel": [12000, 36000, 64000, 90000],
+      "historicalPeriod": "Hùng Vương",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 50000, "DEN": 80000, "THANH": 100000 }
+    },
+    {
+      "id": "SQ006",
+      "name": "Đất Phong Châu",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 80000,
+      "baseRent": 6000,
+      "rentByBuildingLevel": [18000, 50000, 110000, 160000],
+      "historicalPeriod": "Hùng Vương",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 50000, "DEN": 80000, "THANH": 100000 }
+    },
+    {
+      "id": "SQ007",
+      "name": "Ô Vận Mệnh",
+      "type": "EVENT_FATE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ008",
+      "name": "Đất Nghệ An",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 80000,
+      "baseRent": 6000,
+      "rentByBuildingLevel": [18000, 50000, 110000, 160000],
+      "historicalPeriod": "Hùng Vương",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 50000, "DEN": 80000, "THANH": 100000 }
+    },
+    {
+      "id": "SQ009",
+      "name": "Đất Thanh Hóa",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 100000,
+      "baseRent": 8000,
+      "rentByBuildingLevel": [22000, 60000, 140000, 200000],
+      "historicalPeriod": "Hùng Vương",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 50000, "DEN": 80000, "THANH": 100000 }
+    },
+    {
+      "id": "SQ010",
+      "name": "Giam Cầm",
+      "type": "JAIL",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ011",
+      "name": "Đất Thăng Long",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 140000,
+      "baseRent": 10000,
+      "rentByBuildingLevel": [30000, 90000, 160000, 250000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ012",
+      "name": "Sông Đuống",
+      "type": "RIVER",
+      "historicalPeriod": "Lý",
+      "purchasePrice": 200000,
+      "baseRent": 25000,
+      "canBePurchased": true,
+      "canBuildHere": false,
+      "isRiver": true
+    },
+    {
+      "id": "SQ013",
+      "name": "Đất Hoa Lư",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 140000,
+      "baseRent": 10000,
+      "rentByBuildingLevel": [30000, 90000, 160000, 250000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ014",
+      "name": "Đất Đại Việt",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 160000,
+      "baseRent": 12000,
+      "rentByBuildingLevel": [36000, 100000, 200000, 300000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ015",
+      "name": "Ô Cơ Hội",
+      "type": "EVENT_CHANCE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ016",
+      "name": "Đất Nghệ An",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 180000,
+      "baseRent": 14000,
+      "rentByBuildingLevel": [42000, 120000, 240000, 350000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ017",
+      "name": "Đất Thanh Hóa",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 180000,
+      "baseRent": 14000,
+      "rentByBuildingLevel": [42000, 120000, 240000, 350000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ018",
+      "name": "Đất Hải Dương",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 200000,
+      "baseRent": 16000,
+      "rentByBuildingLevel": [48000, 140000, 280000, 400000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ019",
+      "name": "Đất Nam Định",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 200000,
+      "baseRent": 16000,
+      "rentByBuildingLevel": [48000, 140000, 280000, 400000],
+      "historicalPeriod": "Lý",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 100000, "DEN": 150000, "THANH": 200000 }
+    },
+    {
+      "id": "SQ020",
+      "name": "Ngựa Ô",
+      "type": "SPECIAL_ACTION_HORSE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ021",
+      "name": "Đất Huế",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 220000,
+      "baseRent": 18000,
+      "rentByBuildingLevel": [54000, 160000, 320000, 450000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ022",
+      "name": "Ô Vận Mệnh",
+      "type": "EVENT_FATE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ023",
+      "name": "Đất Đông Kinh",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 220000,
+      "baseRent": 18000,
+      "rentByBuildingLevel": [54000, 160000, 320000, 450000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ024",
+      "name": "Đất Bạch Đằng",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 240000,
+      "baseRent": 20000,
+      "rentByBuildingLevel": [60000, 180000, 360000, 500000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ025",
+      "name": "Sông Cầu",
+      "type": "RIVER",
+      "historicalPeriod": "Trần",
+      "purchasePrice": 200000,
+      "baseRent": 25000,
+      "canBePurchased": true,
+      "canBuildHere": false,
+      "isRiver": true
+    },
+    {
+      "id": "SQ026",
+      "name": "Đất Vạn Kiếp",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 260000,
+      "baseRent": 22000,
+      "rentByBuildingLevel": [66000, 200000, 400000, 550000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ027",
+      "name": "Đất Chương Dương",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 260000,
+      "baseRent": 22000,
+      "rentByBuildingLevel": [66000, 200000, 400000, 550000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ028",
+      "name": "Đất Tây Đô",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 280000,
+      "baseRent": 24000,
+      "rentByBuildingLevel": [72000, 220000, 440000, 600000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ029",
+      "name": "Đất Hồ Quý Ly",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 280000,
+      "baseRent": 24000,
+      "rentByBuildingLevel": [72000, 220000, 440000, 600000],
+      "historicalPeriod": "Trần",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 150000, "DEN": 200000, "THANH": 250000 }
+    },
+    {
+      "id": "SQ030",
+      "name": "Đi Tù",
+      "type": "GO_TO_JAIL",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ031",
+      "name": "Đất Lam Sơn",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 300000,
+      "baseRent": 26000,
+      "rentByBuildingLevel": [78000, 240000, 480000, 650000],
+      "historicalPeriod": "Lê",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 200000, "DEN": 250000, "THANH": 300000 }
+    },
+    {
+      "id": "SQ032",
+      "name": "Đất Đông Quan",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 300000,
+      "baseRent": 26000,
+      "rentByBuildingLevel": [78000, 240000, 480000, 650000],
+      "historicalPeriod": "Lê",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 200000, "DEN": 250000, "THANH": 300000 }
+    },
+    {
+      "id": "SQ033",
+      "name": "Ô Cơ Hội",
+      "type": "EVENT_CHANCE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ034",
+      "name": "Đất Tây Sơn",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 320000,
+      "baseRent": 28000,
+      "rentByBuildingLevel": [84000, 260000, 520000, 700000],
+      "historicalPeriod": "Lê",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 200000, "DEN": 250000, "THANH": 300000 }
+    },
+    {
+      "id": "SQ035",
+      "name": "Sông Mã",
+      "type": "RIVER",
+      "historicalPeriod": "Lê",
+      "purchasePrice": 200000,
+      "baseRent": 25000,
+      "canBePurchased": true,
+      "canBuildHere": false,
+      "isRiver": true
+    },
+    {
+      "id": "SQ036",
+      "name": "Ô Vận Mệnh",
+      "type": "EVENT_FATE",
+      "historicalPeriod": null
+    },
+    {
+      "id": "SQ037",
+      "name": "Đất Phú Xuân",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 350000,
+      "baseRent": 35000,
+      "rentByBuildingLevel": [105000, 300000, 600000, 800000],
+      "historicalPeriod": "Lê",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 200000, "DEN": 250000, "THANH": 300000 }
+    },
+    {
+      "id": "SQ038",
+      "name": "Thuế Triều Đình",
+      "type": "TAX_PAYMENT",
+      "historicalPeriod": null,
+      "taxAmount": 100000
+    },
+    {
+      "id": "SQ039",
+      "name": "Đất Thăng Long Hoàng Thành",
+      "type": "PROPERTY_LAND",
+      "purchasePrice": 400000,
+      "baseRent": 50000,
+      "rentByBuildingLevel": [150000, 400000, 800000, 1000000],
+      "historicalPeriod": "Lê",
+      "canBePurchased": true,
+      "canBuildHere": true,
+      "buildingCost": { "NHA": 200000, "DEN": 250000, "THANH": 300000 }
+    },
+    {
+      "id": "SQ040",
+      "name": "Lễ Hội Truyền Thống",
+      "type": "SPECIAL_ACTION_FESTIVAL",
       "historicalPeriod": null
     }
 ]

@@ -12,10 +12,11 @@ const rawHistoricalCards = require('../data/historicalCharacterCards.json');
 const gameSettingsData = require('../data/gameSettings.json');
 
 class GameManager {
-  constructor(roomId, io) {
+  constructor(roomId, gameSettings, io, roomName = null) {
     this.roomId = roomId;
+    this.roomName = roomName || roomId; // Fallback to roomId if no name provided
     this.io = io; // Socket.IO server instance để emit sự kiện
-    this.gameSettings = { ...gameSettingsData };
+    this.gameSettings = gameSettings || { ...gameSettingsData };
     this.board = new Board();
     this.players = [];
     this.currentPlayerIndex = 0;
@@ -29,11 +30,68 @@ class GameManager {
     this.isGameStarted = false;
   }
 
+  // Restore game state from database
+  restoreGameState(gameState) {
+    if (!gameState) return;
+
+    try {
+      // Restore basic game properties
+      this.currentPlayerIndex = gameState.currentPlayerIndex || 0;
+      this.dice = gameState.dice || [0, 0];
+      this.gamePhase = gameState.gamePhase || GAME_PHASES.INITIALIZING;
+      this.turnNumber = gameState.turnNumber || 0;
+      this.gameLog = gameState.gameLog || [];
+      this.activeAlliances = gameState.activeAlliances || [];
+      this.isGameStarted = gameState.isGameStarted || false;
+
+      // Restore players
+      if (gameState.players && Array.isArray(gameState.players)) {
+        this.players = gameState.players.map(playerData => {
+          const player = new Player(playerData);
+          // Restore player properties
+          Object.assign(player, playerData);
+          return player;
+        });
+      }
+
+      // Restore board state
+      if (gameState.board && gameState.board.squares) {
+        gameState.board.squares.forEach(squareData => {
+          const square = this.board.getSquareById(squareData.id);
+          if (square) {
+            square.ownerId = squareData.ownerId;
+            square.buildings = squareData.buildings || [];
+            square.isMortgaged = squareData.isMortgaged || false;
+          }
+        });
+      }
+
+      // Restore card decks if needed
+      if (gameState.eventCardDeck) {
+        this.eventCardDeck = gameState.eventCardDeck.map(cardData => new EventCard(cardData));
+      }
+      if (gameState.historicalCharacterCardDeck) {
+        this.historicalCharacterCardDeck = gameState.historicalCharacterCardDeck.map(cardData => new HistoricalCharacterCard(cardData));
+      }
+
+      console.log(`✅ Game state restored for room ${this.roomId}`);
+    } catch (error) {
+      console.error(`❌ Error restoring game state for room ${this.roomId}:`, error);
+    }
+  }
+
   // --- Quản lý emit sự kiện ---
   // Gửi trạng thái toàn bộ game cho tất cả người chơi trong phòng
   emitGameState() {
     const state = {
       roomId: this.roomId,
+      roomName: this.roomName,
+      status: this.isGameStarted ? 'playing' : 'waiting',
+      settings: {
+        maxPlayers: this.gameSettings.maxPlayers,
+        isPrivate: false, // TODO: Add private room support
+        password: null
+      },
       board: {
           squares: this.board.squares.map(s => ({ // Chỉ gửi thông tin cần thiết
               id: s.id,
@@ -66,6 +124,11 @@ class GameManager {
       lastDiceRoll: this.dice,
       gameLog: this.gameLog.slice(-10) // Gửi 10 log gần nhất
     };
+    console.log('🚀 Emitting game state to room:', this.roomId);
+    console.log('🚀 Players in room:', state.players.map(p => ({ id: p.id, name: p.name })));
+    console.log('🚀 Current player:', state.currentPlayerId);
+    console.log('🚀 Game phase:', state.gamePhase);
+    console.log('🚀 Game status:', state.status);
     this.io.to(this.roomId).emit('gameStateUpdate', state);
   }
 
@@ -114,6 +177,29 @@ class GameManager {
   // Gửi thông báo/lỗi cho một người chơi cụ thể
   emitGameLogToPlayer(playerId, message, type = 'info') { // type: 'info', 'error', 'warning'
     this.io.to(playerId).emit('personalGameMessage', { message, type });
+  }
+
+  // Update room settings
+  async updateRoomSettings(settings) {
+    console.log('🔧 Updating room settings:', settings);
+
+    if (settings.roomName) {
+      this.roomName = settings.roomName;
+    }
+
+    if (settings.maxPlayers) {
+      this.gameSettings.maxPlayers = settings.maxPlayers;
+    }
+
+    if (settings.isPrivate !== undefined) {
+      this.gameSettings.isPrivate = settings.isPrivate;
+    }
+
+    if (settings.password !== undefined) {
+      this.gameSettings.password = settings.password;
+    }
+
+    console.log('✅ Room settings updated successfully');
   }
 
   // Yêu cầu client của người chơi hiển thị lựa chọn
@@ -316,8 +402,8 @@ class GameManager {
     if (isDouble) {
       player.consecutiveDoublesCount++;
       if (player.consecutiveDoublesCount >= this.gameSettings.maxConsecutiveDoubles) {
-        this.logGameAction(`${player.name} tung 3 lần đôi liên tiếp! Đi tù.`);
-        this.sendPlayerToJail(player);
+        this.logGameAction(`${player.name} tung 3 lần đôi liên tiếp! Bị giam cầm 3 lượt.`);
+        this.sendPlayerToJail(player, 3); // Giam cầm 3 lượt theo docs
         this.endPlayerTurnActions(false); // false = không được thêm lượt
         return;
       }
@@ -379,12 +465,12 @@ class GameManager {
     this.emitPlayerMove(player, newPosition); // Gửi sự kiện di chuyển cho client
   }
 
-  sendPlayerToJail(player) {
+  sendPlayerToJail(player, jailTurns = 3) {
     player.updatePosition(this.board.jailSquareIndex);
     player.isInJail = true;
-    player.jailTurnsRemaining = 3; // Số lượt tối đa ở trong tù (không tính lượt này)
+    player.jailTurnsRemaining = jailTurns; // Số lượt tối đa ở trong tù (không tính lượt này)
     player.consecutiveDoublesCount = 0; // Reset
-    this.logGameAction(`${player.name} đã bị đưa vào Giam Cầm.`);
+    this.logGameAction(`${player.name} đã bị đưa vào Giam Cầm ${jailTurns} lượt.`);
     this.emitPlayerMove(player, player.tokenPositionIndex); // Cập nhật vị trí trên UI
     this.emitPlayerUpdate(player); // Cập nhật trạng thái isInJail
   }
@@ -479,10 +565,38 @@ class GameManager {
   }
 
   handleSpecialActionHorseMove(playerId, targetSquareId) {
+      console.log('🐎 Horse move request:', {
+        playerId,
+        targetSquareId,
+        currentPlayerId: this.getCurrentPlayer()?.id,
+        gamePhase: this.gamePhase,
+        expectedPhase: GAME_PHASES.TURN_DECISION
+      });
+
       const player = this.getPlayerById(playerId);
       const targetSquare = this.board.getSquareById(targetSquareId);
-      if (!player || !targetSquare || player.id !== this.getCurrentPlayer().id || this.gamePhase !== GAME_PHASES.TURN_DECISION) {
-          this.emitGameLogToPlayer(playerId, "Hành động không hợp lệ.", "error");
+
+      if (!player) {
+          console.log('❌ Player not found:', playerId);
+          this.emitGameLogToPlayer(playerId, "Không tìm thấy người chơi.", "error");
+          return;
+      }
+
+      if (!targetSquare) {
+          console.log('❌ Target square not found:', targetSquareId);
+          this.emitGameLogToPlayer(playerId, "Không tìm thấy ô đích.", "error");
+          return;
+      }
+
+      if (player.id !== this.getCurrentPlayer().id) {
+          console.log('❌ Not current player:', { playerId: player.id, currentPlayerId: this.getCurrentPlayer().id });
+          this.emitGameLogToPlayer(playerId, "Không phải lượt của bạn.", "error");
+          return;
+      }
+
+      if (this.gamePhase !== GAME_PHASES.TURN_DECISION) {
+          console.log('❌ Wrong game phase:', { currentPhase: this.gamePhase, expectedPhase: GAME_PHASES.TURN_DECISION });
+          this.emitGameLogToPlayer(playerId, "Không thể thực hiện hành động này lúc này.", "error");
           return;
       }
       this.logGameAction(`${player.name} dùng Ngựa Ô di chuyển đến ${targetSquare.name}.`);
@@ -519,16 +633,120 @@ class GameManager {
       this.endPlayerTurnActions();
   }
 
+  handlePlayerPaymentDecision(playerId, decision, data) {
+      const player = this.getPlayerById(playerId);
+      if (!player || player.id !== this.getCurrentPlayer().id || this.gamePhase !== GAME_PHASES.TURN_DECISION) {
+          this.emitGameLogToPlayer(playerId, "Hành động không hợp lệ.", "error");
+          return;
+      }
 
-  requestPlayerPayment(debtorId, creditorIdOrBank, amount, reason) {
+      switch(decision) {
+          case 'PAY_RENT':
+              const creditor = data.creditorId === 'bank' ? 'bank' : this.getPlayerById(data.creditorId);
+              player.payRentOrTax(data.amount, creditor, this);
+              this.endPlayerTurnActions();
+              break;
+          case 'PURCHASE_PROPERTY':
+              this.handlePropertyPurchaseFromOwner(playerId, data.squareId, data.purchasePrice);
+              break;
+          case 'CHALLENGE_OWNER':
+              this.initiateChallengeMode(playerId, data.creditorId, data.squareId);
+              break;
+          default:
+              this.emitGameLogToPlayer(playerId, "Lựa chọn không hợp lệ.", "error");
+      }
+  }
+
+  handlePropertyPurchaseFromOwner(buyerId, squareId, purchasePrice) {
+      const buyer = this.getPlayerById(buyerId);
+      const square = this.board.getSquareById(squareId);
+      const owner = this.getPlayerById(square.ownerId);
+
+      if (!buyer.canAfford(purchasePrice)) {
+          this.emitGameLogToPlayer(buyerId, "Không đủ tiền để mua lại.", "error");
+          this.endPlayerTurnActions();
+          return;
+      }
+
+      buyer.subtractMoney(purchasePrice);
+      owner.addMoney(purchasePrice);
+
+      // Chuyển quyền sở hữu
+      owner.ownedProperties = owner.ownedProperties.filter(id => id !== squareId);
+      buyer.ownedProperties.push(squareId);
+      square.setOwner(buyerId);
+
+      this.logGameAction(`${buyer.name} đã mua lại ${square.name} từ ${owner.name} với giá ${purchasePrice} Vàng.`);
+      this.emitPlayerUpdate(buyer);
+      this.emitPlayerUpdate(owner);
+      this.emitSquareUpdate(square);
+      this.endPlayerTurnActions();
+  }
+
+  initiateChallengeMode(challengerId, defenderId, squareId) {
+      const challenger = this.getPlayerById(challengerId);
+      const defender = this.getPlayerById(defenderId);
+      const square = this.board.getSquareById(squareId);
+
+      this.logGameAction(`${challenger.name} thách đấu ${defender.name} để tranh giành ${square.name}!`);
+
+      // Cả hai người tung xúc xắc, người có điểm cao hơn thắng
+      const challengerRoll = this.rollSingleDice() + this.rollSingleDice();
+      const defenderRoll = this.rollSingleDice() + this.rollSingleDice();
+
+      this.logGameAction(`${challenger.name} tung được: ${challengerRoll}`);
+      this.logGameAction(`${defender.name} tung được: ${defenderRoll}`);
+
+      if (challengerRoll > defenderRoll) {
+          // Challenger thắng, chiếm đất
+          defender.ownedProperties = defender.ownedProperties.filter(id => id !== squareId);
+          challenger.ownedProperties.push(squareId);
+          square.setOwner(challengerId);
+          this.logGameAction(`${challenger.name} thắng thách đấu và chiếm được ${square.name}!`);
+      } else if (defenderRoll > challengerRoll) {
+          // Defender thắng, challenger phải trả tiền thuê gấp đôi
+          const doubleRent = square.calculateCurrentRent(challenger, this) * 2;
+          challenger.payRentOrTax(doubleRent, defender, this);
+          this.logGameAction(`${defender.name} thắng thách đấu! ${challenger.name} phải trả gấp đôi tiền thuê: ${doubleRent} Vàng.`);
+      } else {
+          // Hòa, challenger chỉ trả tiền thuê bình thường
+          const normalRent = square.calculateCurrentRent(challenger, this);
+          challenger.payRentOrTax(normalRent, defender, this);
+          this.logGameAction(`Thách đấu hòa! ${challenger.name} trả tiền thuê bình thường: ${normalRent} Vàng.`);
+      }
+
+      this.emitPlayerUpdate(challenger);
+      this.emitPlayerUpdate(defender);
+      this.emitSquareUpdate(square);
+      this.endPlayerTurnActions();
+  }
+
+  rollSingleDice() {
+      return Math.floor(Math.random() * 6) + 1;
+  }
+
+  requestPlayerPayment(debtorId, creditorIdOrBank, amount, reason, options = {}) {
       const debtor = this.getPlayerById(debtorId);
       if (!debtor) return;
 
       this.emitGameLog(`${debtor.name} phải trả ${amount} Vàng cho ${creditorIdOrBank === 'bank' ? 'ngân hàng' : this.getPlayerById(creditorIdOrBank)?.name} (${reason}).`);
 
       if (debtor.canAfford(amount)) {
-          const creditor = creditorIdOrBank === 'bank' ? 'bank' : this.getPlayerById(creditorIdOrBank);
-          debtor.payRentOrTax(amount, creditor, this); // payRentOrTax đã emitPlayerUpdate
+          // Nếu có thể mua lại hoặc thách đấu
+          if (options.allowPurchase || options.allowChallenge) {
+              this.promptPlayerAction(debtor.id, 'PAYMENT_OPTIONS', {
+                  amount,
+                  reason,
+                  creditorId: creditorIdOrBank,
+                  allowPurchase: options.allowPurchase,
+                  purchasePrice: options.purchasePrice,
+                  allowChallenge: options.allowChallenge && creditorIdOrBank !== 'bank',
+                  squareId: options.squareId
+              });
+          } else {
+              const creditor = creditorIdOrBank === 'bank' ? 'bank' : this.getPlayerById(creditorIdOrBank);
+              debtor.payRentOrTax(amount, creditor, this);
+          }
       } else {
           this.emitGameLogToPlayer(debtorId, `Bạn không đủ ${amount} Vàng để trả. Cần bán tài sản hoặc cầm cố.`);
           this.handlePlayerInDebt(debtor, creditorIdOrBank, amount);
@@ -555,6 +773,12 @@ class GameManager {
 
   // --- Thẻ bài ---
   playerDrawsEventCard(player, deckType) { // deckType: EVENT_CHANCE or EVENT_FATE
+    console.log('🃏 Drawing event card:', {
+      playerName: player.name,
+      deckType,
+      totalEventCards: this.eventCardDeck.length
+    });
+
     let deckToDrawFrom = [];
     if (deckType === SQUARE_TYPES.EVENT_CHANCE) {
         deckToDrawFrom = this.eventCardDeck.filter(c => c.cardType === 'EVENT_OPPORTUNITY');
@@ -564,7 +788,10 @@ class GameManager {
         deckToDrawFrom = this.eventCardDeck;
     }
 
+    console.log('🃏 Available cards in deck:', deckToDrawFrom.length);
+
     if (deckToDrawFrom.length === 0) {
+      console.log('🃏 No cards available in deck');
       this.logGameAction("Bộ bài Sự Kiện đã hết!");
       // Có thể xáo lại các thẻ đã dùng (nếu có)
       return null;
@@ -572,19 +799,38 @@ class GameManager {
     const card = deckToDrawFrom.pop(); // Lấy thẻ trên cùng
     this.eventCardDeck.unshift(card); // Đặt lại xuống dưới cùng bộ bài chính (hoặc có 1 discard pile riêng)
 
+    console.log('🃏 Card drawn:', {
+      title: card.title,
+      eventType: card.eventType,
+      description: card.descriptionText
+    });
+
     this.emitGameLogToPlayer(player.id, `Bạn rút thẻ: ${card.title} - ${card.descriptionText}`, 'event');
     this.io.to(this.roomId).emit('playerDrewCard', { playerId: player.id, card: {title: card.title, descriptionText: card.descriptionText, cardType: card.cardType }});
     return card;
   }
 
   applyEventCardEffect(player, card) {
+    console.log('🃏 Applying event card effect:', {
+      cardTitle: card.title,
+      cardType: card.eventType,
+      playerName: player.name,
+      currentPhase: this.gamePhase
+    });
+
     card.applyEffect(player, this); // Thẻ tự áp dụng hiệu ứng
+
+    console.log('🃏 After card effect, phase:', this.gamePhase);
+
     // applyEffect của thẻ có thể thay đổi phase nếu cần thêm input
     // Nếu không, và phase vẫn là PLAYER_ACTION, thì chuyển sang kết thúc lượt
     if (this.gamePhase === GAME_PHASES.PLAYER_ACTION) {
-        this.setGamePhase(GAME_PHASES.TURN_ENDING);
+        console.log('🃏 Card effect completed, ending turn');
+        this.endPlayerTurnActions();
+    } else {
+        console.log('🃏 Card effect changed phase, emitting game state');
+        this.emitGameState();
     }
-    this.emitGameState();
   }
 
   playerUsesHistoricalCharacterCard(playerId) {
@@ -653,27 +899,66 @@ class GameManager {
 
 
   checkWinConditions() {
-    // Các điều kiện thắng:
-    // 1. Người chơi khác phá sản hết.
-    // 2. Đạt được mục tiêu Vàng nhất định (nếu có).
-    // 3. Sở hữu một số lượng Độc Quyền nhất định (nếu có).
-    // 4. Hết số lượt chơi quy định và có điểm cao nhất (nếu có).
+    // Các điều kiện thắng theo docs:
+    // 1. Thống nhất được lãnh thổ của 1 thời kỳ (chiếm được 8 ô cùng 1 dãy)
+    // 2. Chiếm được 4 con sông 4 thời kỳ
+    // 3. Là người giàu nhất khi hết thời gian (do người chơi tự setup thời gian)
+    // 4. Khi người chơi đạt monopoly 3 lần
+    // 5. Người chơi khác phá sản hết
 
-    const activePlayers = this.players.filter(p => !p.isBankrupt); // Cần thêm trạng thái isBankrupt
-    if (activePlayers.length === 1 && this.players.length > 1) { // Chỉ còn 1 người không phá sản
+    const activePlayers = this.players.filter(p => !p.isBankrupt);
+    if (activePlayers.length === 1 && this.players.length > 1) {
       this.endGame(activePlayers[0], "là người sống sót cuối cùng.");
       return true;
     }
 
-    // Ví dụ: Thắng nếu sở hữu 3 bộ độc quyền
     for (const player of this.players) {
-        if (player.monopolySets.length >= 3) { // Giả sử có luật này
-            this.endGame(player, `đã sở hữu ${player.monopolySets.length} bộ độc quyền!`);
-            return true;
-        }
+      if (player.isBankrupt) continue;
+
+      // Điều kiện 1: Thống nhất lãnh thổ 1 thời kỳ (8 ô liên tiếp cùng thời kỳ)
+      if (this.checkTerritoryUnification(player)) {
+        this.endGame(player, "đã thống nhất lãnh thổ của một thời kỳ!");
+        return true;
+      }
+
+      // Điều kiện 2: Chiếm 4 con sông 4 thời kỳ khác nhau
+      if (this.checkRiverControl(player)) {
+        this.endGame(player, "đã chiếm được 4 con sông của 4 thời kỳ!");
+        return true;
+      }
+
+      // Điều kiện 4: Đạt monopoly 3 lần
+      if (player.monopolySets.length >= this.gameSettings.winConditions.monopolyCount) {
+        this.endGame(player, `đã sở hữu ${player.monopolySets.length} bộ độc quyền!`);
+        return true;
+      }
     }
-    // Thêm các điều kiện khác...
+
     return false;
+  }
+
+  checkTerritoryUnification(player) {
+    // Kiểm tra xem player có sở hữu 8 ô liên tiếp cùng thời kỳ không
+    const periods = ['Hùng Vương', 'An Dương Vương', 'Lý', 'Trần', 'Lê'];
+
+    for (const period of periods) {
+      const periodSquares = this.board.getSquaresByHistoricalPeriod(period);
+      const ownedInPeriod = periodSquares.filter(sq => player.ownedProperties.includes(sq.id));
+
+      if (ownedInPeriod.length >= this.gameSettings.winConditions.territoryUnificationSquares) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkRiverControl(player) {
+    // Kiểm tra xem player có sở hữu 4 con sông của 4 thời kỳ khác nhau không
+    const riverSquares = this.board.squares.filter(sq => sq.type === SQUARE_TYPES.RIVER && sq.isOwned());
+    const ownedRivers = riverSquares.filter(sq => sq.ownerId === player.id);
+
+    const uniquePeriods = new Set(ownedRivers.map(sq => sq.historicalPeriod));
+    return uniquePeriods.size >= this.gameSettings.winConditions.riverSquaresRequired;
   }
 
   endGame(winner, reason) {
@@ -896,7 +1181,7 @@ class GameManager {
       this.setGamePhase(GAME_PHASES.PLAYER_ACTION); // Đặt phase để người chơi không làm gì khác ngoài xử lý nợ
   }
 
-  eclareBankruptcy(bankruptPlayer, creditorOrBank) {
+  declareBankruptcy(bankruptPlayer, creditorOrBank) {
     this.logGameAction(`!!! ${bankruptPlayer.name} đã tuyên bố PHÁ SẢN !!!`);
     bankruptPlayer.isBankrupt = true; // Thêm thuộc tính này vào Player class
 

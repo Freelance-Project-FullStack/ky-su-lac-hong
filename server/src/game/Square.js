@@ -6,7 +6,7 @@ class Square {
     id, name, type, purchasePrice = 0, baseRent = 0, rentByBuildingLevel = [],
     historicalPeriod = null, canBePurchased = false, canBuildHere = false,
     buildingCost = {}, // VD: { NHA: 5000, DEN: 8000 }
-    visualAsset = null
+    visualAsset = null, isRiver = false, taxAmount = 0
   }) {
     this.id = id;
     this.name = name;
@@ -24,6 +24,9 @@ class Square {
 
     this.buildingCost = buildingCost; // Chi phí xây từng loại nhà ban đầu
     this.isMortgaged = false;
+    this.isRiver = isRiver;
+    this.taxAmount = taxAmount;
+    this.cannotBeAcquired = false; // Đánh dấu ô không thể bị mua lại sau khi nâng cấp
   }
 
   calculateCurrentRent(visitingPlayer, gameManager) {
@@ -60,27 +63,29 @@ class Square {
 
   addBuilding(buildingType, playerId, gameManager) {
     if (this.ownerId !== playerId || !this.canBuildHere) {
-      // gameManager.emitErrorToPlayer(playerId, "Không thể xây dựng ở đây hoặc bạn không sở hữu ô này.");
       return false;
     }
 
-    // Kiểm tra số lượng công trình hiện tại (ví dụ tối đa 3 nhà -> Làng)
+    const { BUILDING_TYPES } = require('./enums');
+    const player = gameManager.getPlayerById(playerId);
+
+    // Kiểm tra số lượng công trình hiện tại
     const existingBuildingsOfType = this.buildings.filter(b => b.type === buildingType).length;
 
-    // TODO: Logic nâng cấp (3 Đền -> Chùa, etc.)
-    // if (existingBuildingsOfType >= 3 && buildingType === BUILDING_TYPES.NHA) { /* nâng cấp lên Làng */ }
+    // Logic nâng cấp: 3 công trình cùng loại → nâng cấp
+    if (existingBuildingsOfType >= gameManager.gameSettings.buildingUpgradeThreshold) {
+      return this.upgradeBuilding(buildingType, playerId, gameManager);
+    }
 
-    // Tạm thời chỉ thêm
-    const cost = this.buildingCost[buildingType]; // Lấy chi phí từ định nghĩa ô đất
+    const cost = this.buildingCost[buildingType];
     if (!cost) {
         gameManager.emitGameLogToPlayer(playerId, `Loại công trình ${buildingType} không xác định chi phí.`);
         return false;
     }
 
-    const player = gameManager.getPlayerById(playerId);
     if (player.canAfford(cost)) {
       player.subtractMoney(cost);
-      this.buildings.push({ type: buildingType, level: 1 }); // Cần class Building đầy đủ hơn
+      this.buildings.push({ type: buildingType, level: 1 });
       gameManager.logGameAction(`${player.name} xây ${buildingType} tại ${this.name}.`);
       gameManager.emitPlayerUpdate(player);
       gameManager.emitSquareUpdate(this);
@@ -89,6 +94,41 @@ class Square {
       gameManager.emitGameLogToPlayer(playerId, `Không đủ Vàng để xây ${buildingType}.`);
       return false;
     }
+  }
+
+  upgradeBuilding(buildingType, playerId, gameManager) {
+    const { BUILDING_TYPES } = require('./enums');
+    const player = gameManager.getPlayerById(playerId);
+
+    // Định nghĩa nâng cấp theo docs
+    const upgradeMap = {
+      [BUILDING_TYPES.DEN]: BUILDING_TYPES.CHUA,
+      [BUILDING_TYPES.THANH]: BUILDING_TYPES.KHU_QUAN_SU,
+      [BUILDING_TYPES.NHA]: BUILDING_TYPES.LANG
+    };
+
+    const upgradedType = upgradeMap[buildingType];
+    if (!upgradedType) {
+      gameManager.emitGameLogToPlayer(playerId, `Không thể nâng cấp ${buildingType}.`);
+      return false;
+    }
+
+    // Xóa 3 công trình cũ và thêm 1 công trình nâng cấp
+    const buildingsToRemove = this.buildings.filter(b => b.type === buildingType).slice(0, 3);
+    buildingsToRemove.forEach(building => {
+      const index = this.buildings.indexOf(building);
+      this.buildings.splice(index, 1);
+    });
+
+    this.buildings.push({ type: upgradedType, level: 1, isUpgraded: true });
+
+    // Đánh dấu ô này không thể bị mua lại (theo docs)
+    this.cannotBeAcquired = true;
+
+    gameManager.logGameAction(`${player.name} đã nâng cấp 3 ${buildingType} thành ${upgradedType} tại ${this.name}. Ô này không thể bị mua lại!`);
+    gameManager.emitPlayerUpdate(player);
+    gameManager.emitSquareUpdate(this);
+    return true;
   }
 
   // Hàm này sẽ được gọi bởi GameManager khi người chơi đáp xuống ô
@@ -101,7 +141,17 @@ class Square {
           if (this.ownerId !== player.id && !this.isMortgaged) {
             const rent = this.calculateCurrentRent(player, gameManager);
             if (rent > 0) {
-              gameManager.requestPlayerPayment(player.id, this.ownerId, rent, "Tiền thuê đất");
+              // Kiểm tra xem có thể mua lại hoặc thách đấu không (nếu chưa nâng cấp)
+              if (!this.cannotBeAcquired) {
+                gameManager.requestPlayerPayment(player.id, this.ownerId, rent, "Tiền thuê đất", {
+                  allowPurchase: true,
+                  purchasePrice: this.purchasePrice * 1.5, // Giá mua lại cao hơn
+                  allowChallenge: true,
+                  squareId: this.id
+                });
+              } else {
+                gameManager.requestPlayerPayment(player.id, this.ownerId, rent, "Tiền thuê đất");
+              }
             }
           } else if (this.ownerId === player.id) {
             // Cho phép xây dựng nếu là đất của mình
@@ -112,15 +162,37 @@ class Square {
           gameManager.promptPlayerAction(player.id, 'LAND_ACTION_BUY', { squareId: this.id, price: this.purchasePrice });
         }
         break;
+      case SQUARE_TYPES.RIVER:
+        if (this.isOwned()) {
+          if (this.ownerId !== player.id && !this.isMortgaged) {
+            const rent = this.calculateCurrentRent(player, gameManager);
+            if (rent > 0) {
+              gameManager.requestPlayerPayment(player.id, this.ownerId, rent, "Phí qua sông");
+            }
+          }
+        } else if (this.canBePurchased) {
+          // Con sông có thể mua
+          gameManager.promptPlayerAction(player.id, 'LAND_ACTION_BUY', { squareId: this.id, price: this.purchasePrice });
+        }
+        break;
       case SQUARE_TYPES.EVENT_CHANCE:
       case SQUARE_TYPES.EVENT_FATE:
+        console.log('🃏 Player landed on event square:', {
+          squareName: this.name,
+          squareType: this.type,
+          playerName: player.name
+        });
         const card = gameManager.playerDrawsEventCard(player, this.type);
         if (card) {
+          console.log('🃏 Card drawn successfully, applying effect');
           gameManager.applyEventCardEffect(player, card);
+        } else {
+          console.log('🃏 No card drawn, ending turn');
+          gameManager.endPlayerTurnActions();
         }
         break;
       case SQUARE_TYPES.TAX_PAYMENT:
-        const taxAmount = this.baseRent; // Giả sử baseRent của ô thuế là số tiền thuế
+        const taxAmount = this.taxAmount || this.baseRent || 100000; // Sử dụng taxAmount từ squares.json
         gameManager.requestPlayerPayment(player.id, 'bank', taxAmount, "Thuế thu nhập");
         break;
       case SQUARE_TYPES.GO_TO_JAIL:
