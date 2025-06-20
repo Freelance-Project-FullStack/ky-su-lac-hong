@@ -18,6 +18,125 @@ export class GameUI {
     this.createChatPanel();
     this.createGameLog();
     this.createActionButtons();
+    this.enhanceBoardUI(); // Add visual enhancements to the board
+  }
+  
+  enhanceBoardUI() {
+    // Phương thức này thêm các hiệu ứng trực quan cho bàn cờ dựa trên thiết kế mẫu
+    const { width, height } = this.scene.cameras.main;
+    
+    // Tạo container cho các trang trí bàn cờ
+    this.elements.boardDecorations = this.scene.add.container(0, 0);
+    
+    // Thêm tiêu đề cho bàn cờ sử dụng font chữ UTM ThuPhap Thien An nếu có
+    const boardTitle = this.scene.add.text(width / 2, 30, 'KỲ SỬ LẠC HỒNG', {
+      fontFamily: '"UTM ThuPhap Thien An", Arial, sans-serif', // Sử dụng font đặc biệt hoặc fallback
+      fontSize: '36px',
+      fontWeight: 'bold',
+      color: '#FFD700', // Màu vàng
+      stroke: '#8B4513', // Viền màu nâu
+      strokeThickness: 4,
+      shadow: {
+        offsetX: 2,
+        offsetY: 2,
+        color: '#000',
+        blur: 5,
+        stroke: true,
+        fill: true
+      }
+    });
+    boardTitle.setOrigin(0.5);
+    this.elements.boardDecorations.add(boardTitle);
+    
+    // Thêm hiệu ứng cho tiêu đề
+    this.scene.tweens.add({
+      targets: boardTitle,
+      y: { from: 25, to: 35 },
+      duration: 2000,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1
+    });
+    
+    try {
+      // Lấy kích thước và vị trí của bàn cờ từ scene
+      const centerX = this.scene.cameras.main.centerX;
+      const centerY = this.scene.cameras.main.centerY;
+      const boardWidth = this.scene.board ? this.scene.board.width : 800;
+      const boardHeight = this.scene.board ? this.scene.board.height : 800;
+      
+      // Thêm hiệu ứng ánh sáng xung quanh bàn cờ
+      const boardGlow = this.scene.add.graphics();
+      boardGlow.fillStyle(0xFFD700, 0.2); // Màu vàng nhạt
+      boardGlow.fillRect(
+        centerX - boardWidth/2 - 15,
+        centerY - boardHeight/2 - 15,
+        boardWidth + 30,
+        boardHeight + 30
+      );
+      boardGlow.setBlendMode(Phaser.BlendModes.ADD);
+      this.elements.boardDecorations.add(boardGlow);
+      
+      // Thêm các biểu tượng trang trí ở các góc
+      const cornerIcons = ['🏯', '🏮', '🏺', '📜'];
+      const cornerPositions = [
+        { x: centerX - boardWidth/2 + 60, y: centerY - boardHeight/2 + 60 }, // Góc trên bên trái
+        { x: centerX + boardWidth/2 - 60, y: centerY - boardHeight/2 + 60 }, // Góc trên bên phải
+        { x: centerX + boardWidth/2 - 60, y: centerY + boardHeight/2 - 60 }, // Góc dưới bên phải
+        { x: centerX - boardWidth/2 + 60, y: centerY + boardHeight/2 - 60 }  // Góc dưới bên trái
+      ];
+      
+      // Thêm các biểu tượng vào các góc
+      cornerPositions.forEach((pos, index) => {
+        const icon = this.scene.add.text(pos.x, pos.y, cornerIcons[index], {
+          fontSize: '40px'
+        });
+        icon.setOrigin(0.5);
+        icon.setInteractive({ useHandCursor: true });
+        icon.on('pointerover', () => {
+          icon.setScale(1.2);
+        });
+        icon.on('pointerout', () => {
+          icon.setScale(1.0);
+        });
+        this.elements.boardDecorations.add(icon);
+      });
+      
+      // Thêm trang trí ở giữa bàn cờ
+      const centerDecoration = this.scene.add.text(centerX, centerY, '⭐', {
+        fontSize: '60px',
+        color: '#FFD700'
+      });
+      centerDecoration.setOrigin(0.5);
+      centerDecoration.setInteractive({ useHandCursor: true });
+      centerDecoration.on('pointerdown', () => {
+        // Hiệu ứng khi click vào ngôi sao ở giữa
+        this.scene.tweens.add({
+          targets: centerDecoration,
+          scale: { from: 1.1, to: 0.8 },
+          duration: 200,
+          yoyo: true,
+          onComplete: () => {
+            // Hiển thị thông tin trò chơi hoặc hướng dẫn
+            PopupManager.info('Kỳ Sử Lạc Hồng', 'Chào mừng đến với trò chơi Kỳ Sử Lạc Hồng!\n\nHãy di chuyển quân cờ và chinh phục các vùng đất để trở thành người chiến thắng.');
+          }
+        });
+      });
+      this.elements.boardDecorations.add(centerDecoration);
+      
+      // Hiệu ứng nhấp nháy cho ngôi sao ở giữa
+      this.scene.tweens.add({
+        targets: centerDecoration,
+        alpha: { from: 0.7, to: 1 },
+        scale: { from: 0.9, to: 1.1 },
+        duration: 1500,
+        yoyo: true,
+        repeat: -1
+      });
+      
+    } catch (error) {
+      console.error('Error adding board decorations:', error);
+    }
   }
 
   createPlayerPanel() {

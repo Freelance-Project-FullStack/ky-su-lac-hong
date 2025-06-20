@@ -18,6 +18,7 @@ client/dist/
 client/build/
 server/dist/
 server/build/
+/design
 
 # Logs
 logs/

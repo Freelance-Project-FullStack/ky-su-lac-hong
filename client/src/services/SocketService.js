@@ -1,5 +1,6 @@
 // client/src/services/SocketService.js
 import io from 'socket.io-client';
+import { EventEmitter } from 'events';
 
 class SocketService {
   constructor() {
@@ -9,8 +10,8 @@ class SocketService {
   }
 
   initEventEmitter() {
-    if (!this.eventEmitter && typeof Phaser !== 'undefined') {
-      this.eventEmitter = new Phaser.Events.EventEmitter();
+    if (!this.eventEmitter) {
+      this.eventEmitter = new EventEmitter();
     }
   }
 
