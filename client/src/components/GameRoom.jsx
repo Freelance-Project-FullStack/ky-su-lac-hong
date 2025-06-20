@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { useSocket } from '../hooks/useSocket';
-import GameBoard from './GameBoard.jsx';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import { useSocket } from "../hooks/useSocket";
+import GameBoard from "./GameBoard.jsx";
 
 const RoomContainer = styled.div`
   display: grid;
@@ -14,7 +14,6 @@ const RoomContainer = styled.div`
 const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 2rem;
 `;
 
 const SidePanel = styled.div`
@@ -43,7 +42,7 @@ const PlayerAvatar = styled.div`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: ${props => props.color || '#e94560'};
+  background: ${(props) => props.color || "#e94560"};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,7 +85,7 @@ const ChatInput = styled.input`
   border-radius: 4px;
   padding: 0.8rem;
   color: white;
-  
+
   &::placeholder {
     color: rgba(255, 255, 255, 0.5);
   }
@@ -100,7 +99,7 @@ const ActionButton = styled(motion.button)`
   border-radius: 4px;
   margin-top: 1rem;
   cursor: pointer;
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -110,50 +109,50 @@ const ActionButton = styled(motion.button)`
 const GameRoom = () => {
   const [players, setPlayers] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [chatInput, setChatInput] = useState('');
+  const [chatInput, setChatInput] = useState("");
   const [gameState, setGameState] = useState(null);
-  
+
   const {
     handleStartGame,
     handleEndTurn,
     handleRollDice,
     handleChatMessage,
-    handleLeaveRoom
+    handleLeaveRoom,
   } = useSocket();
 
   useEffect(() => {
     // Subscribe to socket events
     const socket = window.socket;
-    
+
     // Kiểm tra socket đã được khởi tạo chưa
     if (!socket) {
-      console.error('Socket chưa được khởi tạo khi vào GameRoom');
+      console.error("Socket chưa được khởi tạo khi vào GameRoom");
       return;
     }
 
-    socket.on('playerJoined', (data) => {
+    socket.on("playerJoined", (data) => {
       setPlayers(data.players);
     });
 
-    socket.on('playerLeft', (data) => {
+    socket.on("playerLeft", (data) => {
       setPlayers(data.players);
     });
 
-    socket.on('gameStateUpdate', (state) => {
+    socket.on("gameStateUpdate", (state) => {
       setGameState(state);
     });
 
-    socket.on('chatMessage', (message) => {
-      setMessages(prev => [...prev, message]);
+    socket.on("chatMessage", (message) => {
+      setMessages((prev) => [...prev, message]);
     });
 
     return () => {
       // Kiểm tra socket vẫn tồn tại khi cleanup
       if (socket) {
-        socket.off('playerJoined');
-        socket.off('playerLeft');
-        socket.off('gameStateUpdate');
-        socket.off('chatMessage');
+        socket.off("playerJoined");
+        socket.off("playerLeft");
+        socket.off("gameStateUpdate");
+        socket.off("chatMessage");
       }
     };
   }, []);
@@ -162,7 +161,7 @@ const GameRoom = () => {
     e.preventDefault();
     if (chatInput.trim()) {
       handleChatMessage(chatInput);
-      setChatInput('');
+      setChatInput("");
     }
   };
 
@@ -175,10 +174,7 @@ const GameRoom = () => {
       <SidePanel>
         <PlayerList>
           {players.map((player) => (
-            <PlayerCard
-              key={player.id}
-              whileHover={{ scale: 1.02 }}
-            >
+            <PlayerCard key={player.id} whileHover={{ scale: 1.02 }}>
               <PlayerAvatar color={player.color}>
                 {player.name[0].toUpperCase()}
               </PlayerAvatar>
@@ -220,33 +216,34 @@ const GameRoom = () => {
           </ActionButton>
         )}
 
-        {gameState?.gameStarted && gameState?.currentPlayer === gameState?.playerId && (
-          <>
-            <ActionButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleRollDice}
-              disabled={gameState?.hasRolled}
-            >
-              Tung xúc xắc
-            </ActionButton>
+        {gameState?.gameStarted &&
+          gameState?.currentPlayer === gameState?.playerId && (
+            <>
+              <ActionButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleRollDice}
+                disabled={gameState?.hasRolled}
+              >
+                Tung xúc xắc
+              </ActionButton>
 
-            <ActionButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleEndTurn}
-              disabled={!gameState?.canEndTurn}
-            >
-              Kết thúc lượt
-            </ActionButton>
-          </>
-        )}
+              <ActionButton
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleEndTurn}
+                disabled={!gameState?.canEndTurn}
+              >
+                Kết thúc lượt
+              </ActionButton>
+            </>
+          )}
 
         <ActionButton
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleLeaveRoom}
-          style={{ marginTop: 'auto', background: '#0f3460' }}
+          style={{ marginTop: "auto", background: "#0f3460" }}
         >
           Rời phòng
         </ActionButton>

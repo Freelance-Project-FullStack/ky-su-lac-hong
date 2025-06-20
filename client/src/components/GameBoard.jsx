@@ -1,12 +1,11 @@
-import React from 'react';
-import styled from 'styled-components';
-import { motion } from 'framer-motion';
-import { BOARD_LAYOUT } from '../gameObjects/BoardConfig';
-import { useGameBoard } from '../hooks/useGameBoard';
-import { useGameBoardContext } from '../contexts/GameBoardContext.jsx';
-import BoardSquare from './BoardSquare.jsx';
+import React from "react";
+import styled from "styled-components";
+import { motion } from "framer-motion";
+import { BOARD_LAYOUT, COLOR_GROUPS } from "../gameObjects/BoardConfig";
+import { useGameBoard, SQUARE_DIMENSIONS } from "../hooks/useGameBoard";
+import BoardSquare from "./BoardSquare.jsx";
+import CentralCardArea from "./CentralCardArea.jsx";
 
-// Styled components cho bàn cờ
 const BoardContainer = styled.div`
   position: relative;
   width: 100%;
@@ -14,77 +13,76 @@ const BoardContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('/assets/images/board/mat_ban_co.png') center center no-repeat;
-  background-size: cover; /* Thay đổi từ contain sang cover để phủ toàn bộ */
+  /* Nền chính của bàn cờ giờ sẽ là logo Ký Sự Lạc Hồng */
+  background: url("/assets/images/board/mat_ban_co.png") center center no-repeat;
+  background-size: cover;
   overflow: hidden;
-  
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.05); /* Giảm độ mờ */
-    pointer-events: none;
-  }
+`;
+
+const GameBoardArea = styled.div`
+  position: relative;
+  width: ${(props) => props.size}px;
+  height: ${(props) => props.size}px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const BoardWrapper = styled(motion.div)`
-  position: relative;
-  width: ${props => props.size}px;
-  height: ${props => props.size}px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
   display: grid;
   place-items: center;
   transform-origin: center;
-  /* Thêm hiệu ứng 3D nhẹ */
-  transform-style: preserve-3d;
-  perspective: 1000px;
 `;
 
 const GameBoard = () => {
-  const {
-    boardSize,
-    squareSize,
-    getSquarePosition,
-    getSquareAngle,
-    getSquareColors
-  } = useGameBoard();
+  const { boardSize, getSquarePosition, getSquareAngle } = useGameBoard();
+  const totalSquares = BOARD_LAYOUT.length;
 
-  const {
-    hoveredSquare,
-    setHoveredSquare,
-    handleSquareClick,
-    getSquareState
-  } = useGameBoardContext();
+  const currentLayout = BOARD_LAYOUT;
 
   return (
     <BoardContainer>
-      <BoardWrapper
-        size={boardSize}
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
-      >
-        {BOARD_LAYOUT.map((square, index) => {
-          const position = getSquarePosition(index);
-          const angle = getSquareAngle(index);
-          const colors = getSquareColors(square.type);
-          
-          return (
-            <BoardSquare
-              key={index}
-              square={{
-                ...square,
-                colors,
-                icon: square.key ? `/assets/images/board/${square.key}.png` : null
-              }}
-              position={position}
-              angle={angle}
-            />
-          );
-        })}
-      </BoardWrapper>
+      <GameBoardArea size={boardSize}>
+        <CentralCardArea />
+
+        <BoardWrapper
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          {currentLayout.map((squareData, index) => {
+            const position = getSquarePosition(index, totalSquares);
+            const angle = getSquareAngle(index, totalSquares);
+
+            const backgroundImage = squareData.iconKey
+              ? `/assets/images/board/${squareData.iconKey}.png`
+              : "/assets/images/board/default_bg.png"; // Thêm ảnh nền mặc định
+
+            const isCorner = squareData.type === "corner";
+            const squareWidth = isCorner
+              ? SQUARE_DIMENSIONS.CORNER
+              : SQUARE_DIMENSIONS.SHORT_SIDE;
+            const squareHeight = isCorner
+              ? SQUARE_DIMENSIONS.CORNER
+              : SQUARE_DIMENSIONS.LONG_SIDE;
+
+            return (
+              <BoardSquare
+                key={squareData.id}
+                square={squareData}
+                position={position}
+                angle={angle}
+                width={squareWidth}
+                height={squareHeight}
+                backgroundImage={backgroundImage}
+              />
+            );
+          })}
+        </BoardWrapper>
+      </GameBoardArea>
     </BoardContainer>
   );
 };
