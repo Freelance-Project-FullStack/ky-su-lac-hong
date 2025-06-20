@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from "react";
 
 export const SQUARE_DIMENSIONS = {
-  CORNER: 110, // Kích thước ô góc (vuông)
+  CORNER: 120, // Kích thước ô góc (vuông)
   LONG_SIDE: 110, // Chiều dài của ô thường
-  SHORT_SIDE: 65, // Chiều rộng của ô thường
+  SHORT_SIDE: 90, // Chiều rộng của ô thường
 };
 
 export const useGameBoard = () => {

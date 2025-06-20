@@ -87,11 +87,12 @@ const ColorStripe = styled.div`
 `;
 
 const SquareName = styled.div`
-  font-size: 11px;
+  text-align: center;
+  font-size: 13px;
   font-weight: 700;
   text-shadow: 1px 1px 3px #000;
   padding: 0 2px;
-  margin-top: ${(props) => (props.hasColorStripe ? "15px" : "0")};
+  margin-top: 10px;
 `;
 
 const SquarePrice = styled.div`
@@ -102,13 +103,14 @@ const SquarePrice = styled.div`
 
 // Tooltip giữ nguyên
 const Tooltip = styled(motion.div)`
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  z-index: 999;
+  // position: absolute;
+  // top: -10px;
+  // left: 50%;
+  overflow: scroll;
+  width: 200px;
+  height: auto;
   transform: translateX(-50%);
-  background: ${(props) =>
-    props.colors ? props.colors.gradient : "rgba(0, 0, 0, 0.9)"};
+  background: rgba(0, 0, 0, 0.9);
   color: white;
   padding: 15px;
   border-radius: 8px;
@@ -117,12 +119,8 @@ const Tooltip = styled(motion.div)`
   white-space: pre-line;
   pointer-events: none;
   z-index: 100;
-  box-shadow: ${(props) =>
-    props.colors ? props.colors.shadow : "0 4px 6px rgba(0, 0, 0, 0.1)"};
-  border: 2px solid
-    ${(props) =>
-      props.colors ? props.colors.border : "rgba(255, 255, 255, 0.1)"};
-  min-width: 200px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   text-align: center;
 
   &:after {
@@ -135,15 +133,14 @@ const Tooltip = styled(motion.div)`
     height: 0;
     border-left: 8px solid transparent;
     border-right: 8px solid transparent;
-    border-top: 8px solid
-      ${(props) => (props.colors ? props.colors.border : "rgba(0, 0, 0, 0.9)")};
+    border-top: 8px solid rgba(0, 0, 0, 0.9);
   }
 
   .tooltip-title {
     font-weight: bold;
     font-size: 14px;
     margin-bottom: 5px;
-    color: ${(props) => (props.colors ? props.colors.bg : "white")};
+    color: white;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 
@@ -169,6 +166,7 @@ const BoardSquare = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { name, type, group, price } = square;
+  console.log("square:", square);
   const [isActive, setIsActive] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
 
@@ -217,7 +215,7 @@ const BoardSquare = ({
               animate="visible"
               exit="hidden"
               variants={tooltipVariants}
-              colors={square.colors}
+              // colors={square.colors}
             >
               <div className="tooltip-title">{square.name}</div>
               <div className="tooltip-type">{`Loại: ${square.type}`}</div>
